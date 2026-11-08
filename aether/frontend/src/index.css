@@ -1,0 +1,18 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root { color-scheme: dark; }
+body { background: radial-gradient(1200px 600px at 80% -10%, rgba(99,102,241,.10), transparent 60%), #07080c; min-height: 100vh; }
+
+@layer components {
+  .card { @apply min-w-0 rounded-xl border border-ink-700 bg-ink-850/80 backdrop-blur; }
+  .btn { @apply inline-flex items-center justify-center gap-1.5 rounded-lg border border-ink-600 bg-ink-800 px-3 py-1.5 text-sm font-medium text-slate-200 transition hover:bg-ink-700 disabled:cursor-not-allowed disabled:opacity-50 focus:outline-none focus-visible:ring-2 focus-visible:ring-aether-400; }
+  .btn-primary { @apply border-aether-500 bg-aether-500 text-white hover:bg-aether-600; }
+  .btn-danger { @apply border-rose-500/40 bg-rose-500/10 text-rose-300 hover:bg-rose-500/20; }
+  .input { @apply w-full rounded-lg border border-ink-600 bg-ink-900 px-3 py-2 text-sm text-slate-100 placeholder:text-slate-500 focus:border-aether-400 focus:outline-none focus:ring-1 focus:ring-aether-400; }
+  .label { @apply mb-1 block text-xs font-medium uppercase tracking-wide text-slate-400; }
+}
+
+::-webkit-scrollbar { width: 8px; height: 8px; }
+::-webkit-scrollbar-thumb { background: #2a3042; border-radius: 8px; }

@@ -1,0 +1,48 @@
+# Aether ⚡ — full stack with one command:  docker compose up --build
+# Dashboard: http://localhost:8080   (API key: value of AETHER_API_KEY, default "aether-demo-key")
+
+services:
+  redis:
+    image: redis:7-alpine
+    # AOF persistence so queued jobs, schedules and the DLQ survive restarts
+    command: ["redis-server", "--appendonly", "yes", "--appendfsync", "everysec", "--maxmemory-policy", "noeviction"]
+    volumes:
+      - redis-data:/data
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 5s
+      timeout: 3s
+      retries: 10
+    restart: unless-stopped
+
+  backend:
+    build: ./backend
+    environment:
+      NODE_ENV: production
+      ROLE: all                      # all | api | worker  (split them to scale workers independently)
+      PORT: "4000"
+      REDIS_URL: redis://redis:6379
+      API_KEYS: ${AETHER_API_KEY:-aether-demo-key}
+      WORKER_CONCURRENCY: ${WORKER_CONCURRENCY:-10}
+      THREAD_POOL_SIZE: ${THREAD_POOL_SIZE:-4}
+      # Demo conveniences — turn both OFF for any internet-facing deployment:
+      ENABLE_WEBHOOK_SINK: ${ENABLE_WEBHOOK_SINK:-true}
+      WEBHOOK_ALLOW_PRIVATE: ${WEBHOOK_ALLOW_PRIVATE:-true}
+      LOG_LEVEL: ${LOG_LEVEL:-info}
+    depends_on:
+      redis:
+        condition: service_healthy
+    stop_grace_period: 20s          # lets workers finish in-flight jobs on `docker compose stop`
+    restart: unless-stopped
+
+  frontend:
+    build: ./frontend
+    ports:
+      - "${AETHER_PORT:-8080}:80"
+    depends_on:
+      backend:
+        condition: service_healthy
+    restart: unless-stopped
+
+volumes:
+  redis-data:
